@@ -71,6 +71,7 @@ argo-cd:
     ## The config section is used to generate ConfigMap: argocd-cm
     config:
       accounts.george: apiKey, login
+      accounts.member: apiKey, login
       accounts.image-updater: apiKey
 
     # -- ArgoCD rbac config ([ArgoCD RBAC policy])
