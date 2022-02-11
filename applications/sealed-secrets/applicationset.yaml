@@ -1,0 +1,38 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: bitnami-sealed-secrets
+  namespace: argocd
+spec:
+  generators:
+  - clusters: {}
+  template:
+    metadata:
+      name: '{{name}}-bitnami-sealed-secrets'
+      namespace: argocd
+      finalizers:
+        - resources-finalizer.argocd.argoproj.io
+      annotations:
+        argocd-image-updater.argoproj.io/image-list: sealed-secrets=quay.io/bitnami/sealed-secrets-controller
+        argocd-image-updater.argoproj.io/sealed-secrets.allow-tags: regexp:^[vV]*([0-9]+)\.([0-9]+)\.([0-9]+)$
+        argocd-image-updater.argoproj.io/sealed-secrets.update-strategy: latest
+        argocd-image-updater.argoproj.io/sealed-secrets.helm.image-name: sealed-secrets.image.name
+        argocd-image-updater.argoproj.io/sealed-secrets.helm.image-tag: sealed-secrets.image.tag
+    spec:
+      project: infrastructure
+      source:
+        repoURL: https://bitnami-labs.github.io/sealed-secrets
+        chart: sealed-secrets
+        targetRevision: 2.0.2
+        helm:
+          valueFiles:
+          - values.yaml
+      destination:
+        name: '{{name}}'
+        namespace: sealed-secrets
+      syncPolicy:
+        syncOptions:
+        - CreateNamespace=true
+        - ApplyOutOfSyncOnly=true
+        - PrunePropagationPolicy=foreground
+        - PruneLast=true

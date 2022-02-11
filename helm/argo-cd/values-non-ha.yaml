@@ -141,6 +141,29 @@ argo-cd:
           - CreateNamespace=true
           - PrunePropagationPolicy=foreground
           - PruneLast=true
+      - name: argocd-applications
+        namespace: argocd
+        destination:
+          namespace: argocd
+          server: https://kubernetes.default.svc
+        project: argocd
+        source:
+          path: applications
+          repoURL: https://github.com/tsungchih/argocd-demo.git
+          targetRevision: HEAD
+          directory:
+            recurse: true
+            jsonnet: {}
+        syncPolicy:
+          automated:
+            prune: true
+            selfHeal: true
+            allowEmpty: false
+          syncOptions:
+          - Validate=true
+          - CreateNamespace=true
+          - PrunePropagationPolicy=foreground
+          - PruneLast=true
 
     # -- Deploy ArgoCD Projects within this helm release
     # @default -- `[]` (See [values.yaml])
