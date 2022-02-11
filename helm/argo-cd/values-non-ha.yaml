@@ -161,4 +161,3 @@ argo-cd:
         kind: '*'
       orphanedResources:
         warn: false
-
