@@ -11,8 +11,10 @@ spec:
   sourceRepos:
   - '*'
   destinations:
-  - namespace: infra
-    server: https://kubernetes.default.svc
+  - namespace: '*'
+    server: '*'
   clusterResourceWhitelist:
   - group: '*'
     kind: '*'
+  orphanedResources:
+    warn: false
