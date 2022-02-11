@@ -9,9 +9,9 @@ metadata:
 spec:
   project: argocd
   source:
-    repoURL: https://github.com/tsungchih/argocd-example.git
+    repoURL: https://github.com/tsungchih/argocd-demo.git
     targetRevision: HEAD
-    path: argocd/non-ha
+    path: kustomize/non-ha
   destination:
     server: https://kubernetes.default.svc
     namespace: argocd
