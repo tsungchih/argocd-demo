@@ -11,5 +11,8 @@ dependencies:
 - name: argocd-notifications
   repository: https://argoproj.github.io/argo-helm
   version: 1.8.0
-digest: sha256:876749b6d0088f27f7ed84b4a773bbb111bf4460867547378f21e0e74652a3e1
-generated: "2022-02-11T20:48:45.305987+08:00"
+- name: argo-rollouts
+  repository: https://argoproj.github.io/argo-helm
+  version: 2.9.3
+digest: sha256:c5b637049509cd7b7923d0f5999aac9ec510e6c099e3db9e135d6cf708e18009
+generated: "2022-02-11T21:31:35.324517+08:00"
