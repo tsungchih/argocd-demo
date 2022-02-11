@@ -1,8 +1,10 @@
 argo-cd:
   installCRDs: false
   global:
-    image:
-      tag: v2.2.5
+    repository: quay.io/argoproj/argocd
+    tag: "v2.2.5"
+    imagePullPolicy: IfNotPresent
+
   controller:
     # -- Deploy the application controller as a StatefulSet instead of a Deployment, this is required for HA capability.
     # This is a feature flag that will become the default in chart version 3.x
@@ -11,14 +13,42 @@ argo-cd:
     logFormat: text
     # -- Application controller log level
     logLevel: info
+
   ## Deploy the Redis with HA support, this is required for HA capability.
   #redis-ha:
   #  enabled: true
+
   ## Deploy the RepoServer with HA support, this is required for HA capability.
   #repoServer:
   #  autoscaling:
   #    enabled: true
   #    minReplicas: 2
+
+  configs:
+    # -- Repositories list to be used by applications
+    ## Creates a secret for each key/value specified below to create repositories
+    ## Note: the last example in the list would use a repository credential template, configured under "configs.repositoryCredentials".
+    repositories:
+      # istio-helm-repo:
+      #   url: https://storage.googleapis.com/istio-prerelease/daily-build/master-latest-daily/charts
+      #   name: istio.io
+      #   type: helm
+      # private-helm-repo:
+      #   url: https://my-private-chart-repo.internal
+      #   name: private-repo
+      #   type: helm
+      #   password: my-password
+      #   username: my-username
+      # private-repo:
+      #   url: https://github.com/argoproj/private-repo
+      argocd-demo:
+        name: argocd-demo
+        type: git
+        url: https://github.com/tsungchih/argocd-demo.git
+      argocd-helm:
+        name: argocd-helm
+        type: helm
+        url: https://argoproj.github.io/argo-helm
 
   ## ArgoCD configuration
   ## Ref: https://github.com/argoproj/argo-cd
@@ -38,13 +68,30 @@ argo-cd:
     #  - name: ARGOCD_API_SERVER_REPLICAS
     #    value: '2'
     configEnabled: true
+    ## The config section is used to generate ConfigMap: argocd-cm
     config:
-      repositories: |
-        - type: git
-          url: https://github.com/tsungchih/argocd-demo.git
-        - name: argo-helm
-          type: helm
-          url: https://argoproj.github.io/argo-helm
+      accounts.george: apiKey, login
+      accounts.image-updater: apiKey
+
+    # -- ArgoCD rbac config ([ArgoCD RBAC policy])
+    ## Ref: https://github.com/argoproj/argo-cd/blob/master/docs/operator-manual/rbac.md
+    rbacConfig:
+      policy.default: role:readonly
+      policy.csv: |
+        p, role:sysadmin, applications, *, */*, allow
+        p, role:sysadmin, clusters, get, *, allow
+        p, role:sysadmin, repositories, get, *, allow
+        p, role:sysadmin, repositories, create, *, allow
+        p, role:sysadmin, repositories, update, *, allow
+        p, role:sysadmin, repositories, delete, *, allow
+        p, role:image-updater, applications, get, */*, allow
+        p, role:image-updater, applications, update, */*, allow
+        g, image-updater, role:image-updater
+        g, george, role:sysadmin
+
+    # -- Deploy ArgoCD Applications within this helm release
+    # @default -- `[]` (See [values.yaml])
+    ## Ref: https://github.com/argoproj/argo-cd/blob/master/docs/operator-manual/
     additionalApplications: 
       - name: argocd
         namespace: argocd
@@ -63,6 +110,10 @@ argo-cd:
         syncPolicy:
           syncOptions:
           - CreateNamespace=true
+
+    # -- Deploy ArgoCD Projects within this helm release
+    # @default -- `[]` (See [values.yaml])
+    ## Ref: https://github.com/argoproj/argo-cd/blob/master/docs/operator-manual/
     additionalProjects: 
     - name: argocd
       namespace: argocd
