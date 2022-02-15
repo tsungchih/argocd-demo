@@ -14,6 +14,8 @@ spec:
         - resources-finalizer.argocd.argoproj.io
       annotations:
         argocd-image-updater.argoproj.io/image-list: sealed-secrets=quay.io/bitnami/sealed-secrets-controller
+        argocd-image-updater.argoproj.io/write-back-method: git:secret:argocd/github-creds
+        argocd-image-updater.argoproj.io/git-branch: main
         argocd-image-updater.argoproj.io/sealed-secrets.allow-tags: regexp:^[vV]*([0-9]+)\.([0-9]+)\.([0-9]+)$
         argocd-image-updater.argoproj.io/sealed-secrets.update-strategy: latest
         argocd-image-updater.argoproj.io/sealed-secrets.helm.image-name: sealed-secrets.image.name
