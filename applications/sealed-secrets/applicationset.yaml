@@ -23,18 +23,19 @@ spec:
     spec:
       project: infrastructure
       source:
-        repoURL: https://bitnami-labs.github.io/sealed-secrets
-        chart: sealed-secrets
-        targetRevision: 2.0.2
+        repoURL: https://github.com/tsungchih/argocd-demo.git
+        path: helm/sealed-secrets
+        targetRevision: HEAD
         helm:
+          version: v3
           valueFiles:
-          - values.yaml
+            - values.yaml
       destination:
         name: '{{name}}'
         namespace: sealed-secrets
       syncPolicy:
         syncOptions:
-        - CreateNamespace=true
-        - ApplyOutOfSyncOnly=true
-        - PrunePropagationPolicy=foreground
-        - PruneLast=true
+          - CreateNamespace=true
+          - ApplyOutOfSyncOnly=true
+          - PrunePropagationPolicy=foreground
+          - PruneLast=true
