@@ -309,12 +309,6 @@ argocd-notifications:
   updateStrategy:
     type: Recreate
 
-  # -- Define user-defined context
-  ## For more information: https://argocd-notifications.readthedocs.io/en/stable/templates/#defining-user-defined-context
-  context: {}
-    # region: east
-    # environmentName: staging
-
   secret:
     # -- Whether helm chart creates controller secret
     create: true
