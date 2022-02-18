@@ -1,6 +1,21 @@
 ingress-nginx:
   controller:
+    kind: DaemonSet
+    
+    #replicaCount: 3
+
+    #minAvailable: 3
+    
+    nodeSelector:
+      kubernetes.io/os: linux
+    
     service:
       externalTrafficPolicy: "Local"
+    
     metrics:
       enabled: true
+    
+    updateStrategy:
+      rollingUpdate:
+        maxUnavailable: 1
+      type: RollingUpdate
