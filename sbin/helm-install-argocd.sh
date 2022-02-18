@@ -28,8 +28,6 @@ if [ "$ans" == "y" ]; then
     --namespace=$ARGOCD_NS \
     --create-namespace \
     -f $VALUES_FILE
-  # Install applicationset controller, will be deprecated starting v2.3 of Argo CD.
-  kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/applicationset/v0.3.0/manifests/install.yaml
 else
   echo "INFO: Exit without any action"
   exit 0
