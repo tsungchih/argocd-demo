@@ -27,9 +27,6 @@ spec:
         path: helm/cert-manager
         targetRevision: HEAD
         helm:
-          repoURL: https://charts.jetstack.io
-          chart: jetstack/cert-manager
-          chartVersion: v1.7.1
           releaseName: cert-manager
           version: v3
           valueFiles:
