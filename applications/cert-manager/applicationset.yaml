@@ -1,0 +1,45 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: cert-manager
+  namespace: argocd
+spec:
+  generators:
+  - clusters: {}
+  template:
+    metadata:
+      name: '{{name}}-cert-manager'
+      namespace: argocd
+      finalizers:
+        - resources-finalizer.argocd.argoproj.io
+      annotations:
+        argocd-image-updater.argoproj.io/image-list: cert-manager=quay.io/jetstack/cert-manager-controller
+        argocd-image-updater.argoproj.io/write-back-method: git:secret:argocd/github-creds
+        argocd-image-updater.argoproj.io/git-branch: master
+        argocd-image-updater.argoproj.io/cert-manager.allow-tags: regexp:^[vV]*([0-9]+)\.([0-9]+)\.([0-9]+)$
+        argocd-image-updater.argoproj.io/cert-manager.update-strategy: latest
+        argocd-image-updater.argoproj.io/cert-manager.helm.image-name: cert-manager.image.name
+        argocd-image-updater.argoproj.io/cert-manager.helm.image-tag: cert-manager.image.tag
+    spec:
+      project: infrastructure
+      source:
+        repoURL: https://github.com/tsungchih/argocd-demo.git
+        path: helm/cert-manager
+        targetRevision: HEAD
+        helm:
+          repoURL: https://charts.jetstack.io
+          chart: jetstack/cert-manager
+          chartVersion: v1.7.1
+          releaseName: cert-manager
+          version: v3
+          valueFiles:
+            - values-dev.yaml
+      destination:
+        name: '{{name}}'
+        namespace: cert-manager
+      syncPolicy:
+        syncOptions:
+          - CreateNamespace=true
+          - ApplyOutOfSyncOnly=true
+          - PrunePropagationPolicy=foreground
+          - PruneLast=true
