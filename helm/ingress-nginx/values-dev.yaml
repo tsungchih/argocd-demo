@@ -1,0 +1,6 @@
+ingress-nginx:
+  controller:
+    service:
+      externalTrafficPolicy: "Local"
+    metrics:
+      enabled: true

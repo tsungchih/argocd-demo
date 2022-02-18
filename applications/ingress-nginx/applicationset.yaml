@@ -1,0 +1,42 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: ingress-nginx
+  namespace: argocd
+spec:
+  generators:
+  - clusters: {}
+  template:
+    metadata:
+      name: '{{name}}-ingress-nginx'
+      namespace: argocd
+      finalizers:
+        - resources-finalizer.argocd.argoproj.io
+      annotations:
+        argocd-image-updater.argoproj.io/image-list: ingress-nginx=k8s.gcr.io/ingress-nginx/controller
+        argocd-image-updater.argoproj.io/write-back-method: git:secret:argocd/github-creds
+        argocd-image-updater.argoproj.io/git-branch: master
+        argocd-image-updater.argoproj.io/ingress-nginx.allow-tags: regexp:^[vV]*([0-9]+)\.([0-9]+)\.([0-9]+)$
+        argocd-image-updater.argoproj.io/ingress-nginx.update-strategy: latest
+        argocd-image-updater.argoproj.io/ingress-nginx.helm.image-name: ingress-nginx.image.name
+        argocd-image-updater.argoproj.io/ingress-nginx.helm.image-tag: ingress-nginx.image.tag
+    spec:
+      project: infrastructure
+      source:
+        repoURL: https://github.com/tsungchih/argocd-demo.git
+        path: helm/ingress-nginx
+        targetRevision: HEAD
+        helm:
+          releaseName: ingress-nginx
+          version: v3
+          valueFiles:
+            - values-dev.yaml
+      destination:
+        name: '{{name}}'
+        namespace: ingress-nginx
+      syncPolicy:
+        syncOptions:
+          - CreateNamespace=true
+          - ApplyOutOfSyncOnly=true
+          - PrunePropagationPolicy=foreground
+          - PruneLast=true
