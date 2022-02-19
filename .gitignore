@@ -37,3 +37,5 @@ secrets/
 # direnv .envrc files
 .envrc
 
+# Temporary directory
+tmp/
