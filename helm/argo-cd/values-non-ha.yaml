@@ -225,10 +225,14 @@ argo-cd:
 
     ingress:
       # -- Enable an ingress resource for the Argo CD server
-      enabled: false
+      enabled: true
       # -- Additional ingress annotations
       annotations:
-        networking.gke.io/v1beta1.FrontendConfig: argocd-server
+        cert-manager.io/cluster-issuer: letsencrypt-prod
+        kubernetes.io/ingress.class: nginx
+        nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+        nginx.ingress.kubernetes.io/ssl-passthrough: "true"
+        nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
       # -- Additional ingress labels
       labels: {}
       # -- Defines which ingress controller will implement the resource
@@ -240,11 +244,11 @@ argo-cd:
       ## Secrets must be manually created in the namespace
       hosts:
         # []
-        - argocd.example.com
+        - argocd.cloudlytics.tk
 
       # -- List of ingress paths
       paths:
-        - /*
+        - /
       # -- Ingress path type. One of `Exact`, `Prefix` or `ImplementationSpecific`
       pathType: Prefix
       # -- Additional ingress paths
@@ -265,11 +269,14 @@ argo-cd:
 
       # -- Ingress TLS configuration
       tls:
-        []
+        - secretName: argocd-secret
+          hosts:
+            - argocd.cloudlytics.tk
+
         # - secretName: argocd-tls-certificate
 
       # -- Uses `server.service.servicePortHttps` instead `server.service.servicePortHttp`
-      https: false
+      https: true
 
 ## Argocd Rollouts Configuration Section.
 ## docs: https://argoproj.github.io/argo-rollouts/
