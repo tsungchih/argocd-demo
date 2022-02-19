@@ -91,7 +91,6 @@ argo-cd:
               baseURL: https://gitlab.bigdatainn-prd.site
               clientID: 6794b7dd337eff52c580a5d0d2712ab96701854ec68eb2f933cbf6bf0d13cc18
               clientSecret: 61efb3a7bfbf5ff2117c7ddad201f654513f97c3c02d88eff245c81ee2fc488c
-              useLoginAsID: false
 
     # -- ArgoCD rbac config ([ArgoCD RBAC policy])
     ## Ref: https://github.com/argoproj/argo-cd/blob/master/docs/operator-manual/rbac.md
