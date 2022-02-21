@@ -79,6 +79,7 @@ argo-cd:
       # Argo CD instance label key
       application.instanceLabelKey: argocd.argoproj.io/instance
       accounts.image-updater: apiKey
+      accounts.guest: apiKey, login
       ## The following configuration shows the way to integrate Dex for implementing SSO with GitLab.
       ## ref: https://dexidp.io/docs/connectors/gitlab/
       #
