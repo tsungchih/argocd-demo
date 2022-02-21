@@ -3,7 +3,7 @@
 ## ref: https://raw.githubusercontent.com/argoproj/argo-helm/master/charts/argo-cd/values.yaml
 ##
 argo-cd:
-  installCRDs: false
+  installCRDs: true
   global:
     repository: quay.io/argoproj/argocd
     tag: "v2.2.5"
@@ -106,6 +106,7 @@ argo-cd:
         p, role:image-updater, applications, get, */*, allow
         p, role:image-updater, applications, update, */*, allow
         g, image-updater, role:image-updater
+        g, guest, role:readonly
 
     # -- Deploy ArgoCD Applications within this helm release
     # @default -- `[]` (See [values.yaml])
