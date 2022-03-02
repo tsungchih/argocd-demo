@@ -1,6 +1,6 @@
-# argocd-demo
+# argo-demo
 
-The [argocd-demo](https://github.com/tsungchih/argocd-demo) is aimed 
+The [argo-demo](https://gitlab.bigdatainn-prd.site/devops/argo-demo) is aimed 
 at demonstrting the use of Argo CD for the platform team to implement GitOps.
 
 ## Repo Structure
@@ -8,7 +8,7 @@ at demonstrting the use of Argo CD for the platform team to implement GitOps.
 This repo is initially organized as follows.
 
 ```shell
-argocd-demo
+argo-demo
 ├── helm
 │   ├── ...
 │   └── argo-cd
@@ -35,7 +35,7 @@ We may install the Argo CD by means of the shell script under `sbin`
 directory. Here is an example to install Argo CD with non-ha mode.
 
 ```shell
-$ git clone https://github.com/tsungchih/argocd-demo.git
+$ git clone https://gitlab.bigdatainn-prd.site/devops/argo-demo.git
 $ cd argocd-demo
 $ sbin/helm-install-argocd.sh helm/argo-cd/values-non-ha.yaml
 ```
@@ -84,7 +84,7 @@ argo-cd:
         project: argocd
         source:
           path: projects
-          repoURL: https://github.com/tsungchih/argocd-demo.git
+          repoURL: https://gitlab.bigdatainn-prd.site/devops/argo-demo.git
           targetRevision: HEAD
           directory:
             recurse: true
@@ -138,6 +138,99 @@ The `spec` says that the there has no restriction to the source repository
 and the destination attached to all the Argo CD Applications within 
 `infrastructure` project.
 
+## Clusters
+
+Clusters in Argo CD is represented as Secrets with mandatory label: `argocd.argoproj.io/secret-type: cluster`. 
+The corresponding secret data could be found [here](https://argo-cd.readthedocs.io/en/stable/operator-manual/declarative-setup/#clusters). In this section, we're going to demonstrate how to add a GKE cluster.
+
+First of all, we apply the following manifests to the GKE cluster which is going to be added to the Argo CD.
+
+```yaml
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: argocd
+  namespace: kube-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: argocd
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+- kind: ServiceAccount
+  name: argocd
+  namespace: kube-system
+```
+
+We can then get the corresponding secret name by means of the following command.
+
+```shell
+$ kubectl -n kube-system get sa argocd -o json | jq -r '.secrets[0].name'
+argocd-token-qncfd
+```
+
+Note that the secret name shown above is `argocd-token-qncfd`. Subsequently, 
+we get the `token` and the `ca.crt` data from within the secret. We have to 
+decode the token we got from the `argocd-token-qncfd` since it is encoded by 
+base64.
+
+```shell
+$ kubectl -n kube-system get secrets argocd-token-qncfd -o json | jq -r '.data.token' | base64 -d
+```
+
+The `caData` in cluster secret could be required as follows.
+
+```shell
+$ kubectl -n kube-system get secrets argocd-token-qncfd -o json | jq -r '.data."ca.crt"'
+```
+
+We may put the above three commands all together in a shell script.
+
+```shell
+#!/bin/bash
+
+secret=$(kubectl -n kube-system get sa argocd -o json | jq -r '.secrets[0].name')
+echo "token:"
+kubectl -n kube-system get secrets $secret -o json | jq -r '.data.token' | base64 -d
+echo
+echo "ca.crt:"
+kubectl -n kube-system get secrets $secret -o json | jq -r '.data."ca.crt"'
+```
+
+We can then generate the cluster secret as follows.
+
+```yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: brand-new-cluster-secret
+  labels:
+    argocd.argoproj.io/secret-type: cluster
+type: Opaque
+stringData:
+  name: brand-new-cluster
+  server: https://brand-new-cluster.example.com
+  config: |
+    {
+      "bearerToken": "<token>", # this is the token, it cannot be base64
+      "tlsClientConfig": {
+        "insecure": false,
+        "caData": "<ca.crt>" # this has to be base64 encoded
+      }
+    }
+```
+
+Now we encrypt the cluster secret by means of sealed-secrets.
+
+```shell
+$ kubeseal --namespace=argocd --scope=namespace-wide --cert=keys/in-cluster-sealed-secrets.pem --secret-file=<path-to-secret> --format=yaml > clusters/dev-sealed.yaml
+```
+
 ## Image Updater
 
 To demonstrate Argo CD Image Updater, we created an ApplicationSet to install Sealed-secrets 
@@ -146,7 +239,7 @@ template in the `ApplicationSet` includes the following annotations:
 
 ```
 argocd-image-updater.argoproj.io/image-list: sealed-secrets=quay.io/bitnami/sealed-secrets-controller
-argocd-image-updater.argoproj.io/write-back-method: git:secret:argocd/github-creds
+argocd-image-updater.argoproj.io/write-back-method: git:secret:argocd/gitlab-creds
 argocd-image-updater.argoproj.io/git-branch: master
 argocd-image-updater.argoproj.io/sealed-secrets.allow-tags: regexp:^[vV]*([0-9]+)\.([0-9]+)\.([0-9]+)$
 argocd-image-updater.argoproj.io/sealed-secrets.update-strategy: latest
@@ -155,12 +248,12 @@ argocd-image-updater.argoproj.io/sealed-secrets.helm.image-tag: sealed-secrets.i
 ```
 
 The `write-back-method` shows that image updater should write image tag back to a git repository and the 
-authentication information could be referenced from a `Secret` called `github-creds` in `argocd` namespace. 
+authentication information could be referenced from a `Secret` called `gitlab-creds` in `argocd` namespace. 
 To make it work, you have to use the following command to create your own `Secret` in `argocd` namespace 
 with proper authentication information.
 
 ```shell
-$ kubectl -n argocd create secret generic github-creds \
+$ kubectl -n argocd create secret generic gitlab-creds \
     --from-literal=username=<USERNAME> \
     --from-literal=password=<PAT>
 ```
@@ -169,7 +262,7 @@ After having created all the above resources in your Kubernetes cluster, you may
 (`argocd-demo/helm/sealed-secrets/.argocd-source-in-cluster-bitnami-sealed-secrets.yaml`) got pushed 
 into the `master` branch with the follwing similar content.
 
-```
+```yaml
 helm:
   parameters:
   - name: sealed-secrets.image.name
