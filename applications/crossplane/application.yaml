@@ -1,0 +1,27 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: crossplane
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: infrastructure
+  source:
+    repoURL: https://github.com/tsungchih/argocd-demo.git
+    path: helm/crossplane
+    targetRevision: HEAD
+    helm:
+      releaseName: crossplane
+      version: v3
+      valueFiles:
+        - values-dev.yaml
+  destination:
+    name: in-cluster
+    namespace: crossplane-system
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+      - ApplyOutOfSyncOnly=true
+      - PrunePropagationPolicy=foreground
+      - PruneLast=true

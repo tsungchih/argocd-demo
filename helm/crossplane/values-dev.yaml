@@ -1,0 +1,6 @@
+crossplane:
+  replicas: 1
+  image:
+    repository: crossplane/crossplane
+    tag: v1.6.3-6.g8abb2704
+    pullPolicy: IfNotPresent
