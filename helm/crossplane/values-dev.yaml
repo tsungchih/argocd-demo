@@ -4,7 +4,5 @@ crossplane:
     repository: crossplane/crossplane
     tag: v1.6.3-6.g8abb2704
     pullPolicy: IfNotPresent
-  clusterPackages:
-    gcp:
-      deploy: true
-      version: master
+  metrics:
+    enabled: true
