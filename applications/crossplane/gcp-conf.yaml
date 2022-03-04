@@ -1,0 +1,28 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: gcp-conf
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: cloud-infra
+  source:
+    repoURL: https://github.com/tsungchih/crossplane-demo.git
+    path: gcp/conf
+    targetRevision: HEAD
+    directory:
+      recurse: true
+  destination:
+    name: in-cluster
+    namespace: crossplane-system
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+      - ApplyOutOfSyncOnly=true
+      - PrunePropagationPolicy=foreground
+      - PruneLast=true
+    automated:
+      prune: true
+      selfHeal: true
+      allowEmpty: false
