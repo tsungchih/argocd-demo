@@ -410,11 +410,11 @@ argocd-notifications:
   ## For more information: https://argocd-notifications.readthedocs.io/en/stable/services/overview/
   notifiers:
     service.email.gmail: |
-      username: $gmail-noreply-username
-      password: $gmail-noreply-password
+      username: $gmail.noreply.username
+      password: $gmail.noreply.password
       host: smtp.gmail.com
       port: 465
-      from: $gmail-noreply-publicname
+      from: $gmail.noreply.publicname
 
   # -- Define user-defined context
   ## For more information: https://argocd-notifications.readthedocs.io/en/stable/templates/#defining-user-defined-context
