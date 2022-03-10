@@ -410,13 +410,11 @@ argocd-notifications:
   ## For more information: https://argocd-notifications.readthedocs.io/en/stable/services/overview/
   notifiers:
     service.email.gmail: |
-      username: $gmail.username
-      password: $gmail.password
+      username: $gmail.noreply.username
+      password: $gmail.noreply.password
       host: smtp.gmail.com
       port: 465
-      from: $gmail.username
-    service.slack: |
-      token: $slack-token
+      from: $gmail.noreply.publicname
 
   # -- Define user-defined context
   ## For more information: https://argocd-notifications.readthedocs.io/en/stable/templates/#defining-user-defined-context
