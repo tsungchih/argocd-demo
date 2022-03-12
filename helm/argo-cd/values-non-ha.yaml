@@ -409,7 +409,7 @@ argocd-notifications:
   # @default -- See [values.yaml]
   ## For more information: https://argocd-notifications.readthedocs.io/en/stable/services/overview/
   notifiers:
-    service.email.gmail: |
+    service.email: |
       username: $gmail-noreply-username
       password: $gmail-noreply-password
       host: smtp.gmail.com
@@ -427,7 +427,7 @@ argocd-notifications:
   subscriptions:
     # subscription for on-created and on-deleted trigger notifications
     - recipients:
-      - email.gmail:sre.dept@cloudlytics.me
+      - email:sre.dept@cloudlytics.me
       triggers:
       - on-created
       - on-deleted
@@ -436,17 +436,17 @@ argocd-notifications:
   ## For more information: https://argocd-notifications.readthedocs.io/en/stable/templates/
   templates:
     template.app-created: |
-      email.gmail:
+      email:
         subject: Application {{.app.metadata.name}} has been created.
       message: |
-        {{if eq .serviceType "email.gmail"}}:grin:{{end}} Application {{.app.metadata.name}} has been created.
+        {{if eq .serviceType "email"}}:grin:{{end}} Application {{.app.metadata.name}} has been created.
     template.app-deleted: |
-      email.gmail:
+      email:
         subject: Application {{.app.metadata.name}} has been deleted.
       message: |
         Application {{.app.metadata.name}} has been deleted.
     template.app-deployed: |
-      email.gmail:
+      email:
         subject: New version of an application {{.app.metadata.name}} is up and running.
       message: |
         {{if eq .serviceType "slack"}}:white_check_mark:{{end}} Application {{.app.metadata.name}} is now running new version of deployments manifests.
