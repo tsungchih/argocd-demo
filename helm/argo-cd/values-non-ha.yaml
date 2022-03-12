@@ -439,7 +439,7 @@ argocd-notifications:
       email:
         subject: Application {{.app.metadata.name}} has been created.
       message: |
-        {{if eq .serviceType "email"}}:grin:{{end}} Application {{.app.metadata.name}} has been created.
+        Service type: {{.serviceType}} Application {{.app.metadata.name}} has been created.
     template.app-deleted: |
       email:
         subject: Application {{.app.metadata.name}} has been deleted.
