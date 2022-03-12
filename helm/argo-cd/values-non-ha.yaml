@@ -425,9 +425,9 @@ argocd-notifications:
   # -- Contains centrally managed global application subscriptions
   ## For more information: https://argocd-notifications.readthedocs.io/en/stable/subscriptions/
   subscriptions:
-    # subscription for on-sync-status-unknown trigger notifications
+    # subscription for on-created and on-deleted trigger notifications
     - recipients:
-      - email:sre.dept@cloudlytics.me
+      - email.gmail:sre.dept@cloudlytics.me
       triggers:
       - on-created
       - on-deleted
@@ -436,17 +436,17 @@ argocd-notifications:
   ## For more information: https://argocd-notifications.readthedocs.io/en/stable/templates/
   templates:
     template.app-created: |
-      email:
+      email.gmail:
         subject: Application {{.app.metadata.name}} has been created.
       message: |
-        {{if eq .serviceType "email"}}:grin:{{end}} Application {{.app.metadata.name}} has been created.
+        {{if eq .serviceType "email.gmail"}}:grin:{{end}} Application {{.app.metadata.name}} has been created.
     template.app-deleted: |
-      email:
+      email.gmail:
         subject: Application {{.app.metadata.name}} has been deleted.
       message: |
         Application {{.app.metadata.name}} has been deleted.
     template.app-deployed: |
-      email:
+      email.gmail:
         subject: New version of an application {{.app.metadata.name}} is up and running.
       message: |
         {{if eq .serviceType "slack"}}:white_check_mark:{{end}} Application {{.app.metadata.name}} is now running new version of deployments manifests.
