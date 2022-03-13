@@ -415,19 +415,20 @@ argocd-notifications:
       host: smtp.gmail.com
       port: 465
       from: $gmail-noreply-publicname
+    service.slack: |
+      token: $slack-token
 
   # -- Define user-defined context
   ## For more information: https://argocd-notifications.readthedocs.io/en/stable/templates/#defining-user-defined-context
-  context: {}
-    # region: east
-    # environmentName: staging
+  context:
+    argocdUrl: https://argocd.cloudlytics.tk
 
   # -- Contains centrally managed global application subscriptions
   ## For more information: https://argocd-notifications.readthedocs.io/en/stable/subscriptions/
   subscriptions:
     # subscription for on-created and on-deleted trigger notifications
     - recipients:
-      - email:sre.dept@cloudlytics.me
+      - slack:argocd-test
       triggers:
       - on-created
       - on-deleted
@@ -439,12 +440,78 @@ argocd-notifications:
       email:
         subject: Application {{.app.metadata.name}} has been created.
       message: |
-        Service type: {{.serviceType}} Application {{.app.metadata.name}} has been created.
+        {{if eq .serviceType "slack"}}:heavy_plus_sign:{{end}} Application {{.app.metadata.name}} has been created within project {{.app.spec.project}}.
+      slack:
+        attachments: |
+          [{
+            "title": "{{ .app.metadata.name}}",
+            "title_link":"{{.context.argocdUrl}}/applications/{{.app.metadata.name}}",
+            "color": "#18be52",
+            "fields": [
+            {
+              "title": "Sync Status",
+              "value": "{{.app.status.sync.status}}",
+              "short": true
+            },
+            {
+              "title": "Repository",
+              "value": "{{.app.spec.source.repoURL}}",
+              "short": true
+            },
+            {
+              "title": "Revision",
+              "value": "{{.app.status.sync.revision}}",
+              "short": true
+            }
+            {{range $index, $c := .app.status.conditions}}
+            {{if not $index}},{{end}}
+            {{if $index}},{{end}}
+            {
+              "title": "{{$c.type}}",
+              "value": "{{$c.message}}",
+              "short": true
+            }
+            {{end}}
+            ]
+          }]
     template.app-deleted: |
       email:
         subject: Application {{.app.metadata.name}} has been deleted.
       message: |
-        Application {{.app.metadata.name}} has been deleted.
+        {{if eq .serviceType "slack"}}:heavy_minus_sign:{{end}} Application {{.app.metadata.name}} has been deleted from project {{.app.spec.project}}.
+      slack:
+        attachments: |
+          [{
+            "title": "{{.app.metadata.name}}",
+            "title_link":"",
+            "color": "#18be52",
+            "fields": [
+            {
+              "title": "Sync Status",
+              "value": "{{.app.status.sync.status}}",
+              "short": true
+            },
+            {
+              "title": "Repository",
+              "value": "{{.app.spec.source.repoURL}}",
+              "short": true
+            },
+            {
+              "title": "Revision",
+              "value": "{{.app.status.sync.revision}}",
+              "short": true
+            }
+            {{range $index, $c := .app.status.conditions}}
+            {{if not $index}},{{end}}
+            {{if $index}},{{end}}
+            {
+              "title": "{{$c.type}}",
+              "value": "{{$c.message}}",
+              "short": true
+            }
+            {{end}}
+            ]
+          }]
     template.app-deployed: |
       email:
         subject: New version of an application {{.app.metadata.name}} is up and running.
