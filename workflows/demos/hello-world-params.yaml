@@ -1,0 +1,19 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: hello-workd-params-
+spec:
+  entrypoint: sayHello
+  arguments:
+    parameters:
+      - name: username
+        value: George
+  templates:
+    - name: sayHello
+      inputs:
+        parameters:
+          - name: username
+      container:
+        image: alpine:latest
+        command: [ echo ]
+        args: [ "hello world, {{inputs.parameters.username}}" ]

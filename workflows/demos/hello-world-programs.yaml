@@ -1,0 +1,24 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: hello-world-programs-
+spec:
+  entrypoint: sayHello
+  templates:
+  - name: sayHello
+    steps:
+    - - name: sayHelloFromPython
+        template: sayHelloPython
+    - - name: sayHelloFromShell
+        template: sayHelloShell
+  - name: sayHelloPython
+    script:
+      image: python:alpine3.7
+      command: [python]
+      source: |
+        print("hello world in Python")
+  - name: sayHelloShell
+    container:
+      image: alpine:latest
+      command: [echo]
+      args: ["hello world in Shell"]
